@@ -3,5 +3,6 @@
     <style name="Theme.Balloony" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/blue</item>
     </style>
 </resources>

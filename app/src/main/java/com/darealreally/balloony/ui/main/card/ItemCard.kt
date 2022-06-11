@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.darealreally.balloony.MockGraph
 import com.darealreally.balloony.R
+import com.darealreally.balloony.Utils.round
 import com.darealreally.balloony.data.Balloon
 import com.darealreally.balloony.data.Feature
 import com.darealreally.balloony.data.features
@@ -139,13 +140,18 @@ fun ItemCard(
                         contentColor = MaterialTheme.colors.background
                     )
                 ) {
-                    Text(
-                        text = "BUY \$${18.20}",
-                        fontWeight = FontWeight.SemiBold,
-                        fontFamily = Quicksand,
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(horizontal = 10.dp)
-                    )
+                    AnimatedContent(
+                        targetState = balloon.price
+                    ) { price ->
+                        val totalPrice = price * quantity
+                        Text(
+                            text = "BUY $${ totalPrice.round(2)}",
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = Quicksand,
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(horizontal = 10.dp)
+                        )
+                    }
                 }
             }
 
