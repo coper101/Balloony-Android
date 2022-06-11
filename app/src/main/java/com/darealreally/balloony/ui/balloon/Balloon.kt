@@ -19,16 +19,15 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.darealreally.balloony.MockGraph
 import com.darealreally.balloony.R
-import com.darealreally.balloony.ui.AppState
-import com.darealreally.balloony.ui.StatelessApp
 import com.darealreally.balloony.ui.theme.BalloonyTheme
 
 @Composable
 fun BalloonTop(
     modifier: Modifier = Modifier,
-    gradientColors: List<Color> = StatelessApp().balloons[0].gradientColors,
-    length: Float = StatelessApp().balloons[0].topViewLength
+    gradientColors: List<Color> = MockGraph.balloons[0].gradientColors,
+    length: Float = MockGraph.balloons[0].topViewLength
 ) {
     // Props
     val lengthPx = with(LocalDensity.current) { length.dp.toPx() }
@@ -71,8 +70,8 @@ fun BalloonTop(
 @Composable
 fun BalloonFront(
     modifier: Modifier = Modifier,
-    gradientColors: List<Color> = StatelessApp().balloons[0].gradientColors,
-    size: Size = StatelessApp().balloons[0].frontViewSizeBig,
+    gradientColors: List<Color> = MockGraph.balloons[0].gradientColors,
+    size: Size = MockGraph.balloons[0].frontViewSizeBig,
     requiredWidth: Float = size.width
 ) {
     // Props

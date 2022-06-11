@@ -3,16 +3,15 @@ package com.darealreally.balloony.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import com.darealreally.balloony.Graph
 import com.darealreally.balloony.ui.main.MainScreen
+import com.darealreally.balloony.ui.main.MainUiState
 import com.darealreally.balloony.ui.splash.SplashScreen
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.darealreally.balloony.ui.splash.SplashUiState
 
 enum class ScreenContent {
     Splash,
@@ -30,7 +29,8 @@ fun BalloonyApp(
 
         // Layer 1: SPLASH
         SplashScreen(
-            setContent = { appState.setScreenContent(it) }
+            setContent = { appState.setScreenContent(it) },
+            splashUiState = SplashUiState(Graph.balloons)
         )
 
         // Layer 2: MAIN
@@ -39,7 +39,9 @@ fun BalloonyApp(
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            MainScreen()
+            MainScreen(
+                mainUiState = MainUiState(Graph.balloons),
+            )
         }
 
     } //: Box

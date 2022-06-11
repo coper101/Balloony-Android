@@ -67,3 +67,8 @@ dependencies {
     implementation "androidx.compose.foundation:foundation:1.2.0-beta03"
 
 }
+
+// opt-in is experimental
+kotlin.sourceSets.all {
+    languageSettings.optIn("kotlin.RequiresOptIn")
+}

@@ -1,6 +1,8 @@
 package com.darealreally.balloony.ui.main.card
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.*
@@ -10,9 +12,13 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -20,17 +26,35 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.darealreally.balloony.MockGraph
 import com.darealreally.balloony.R
+import com.darealreally.balloony.data.Balloon
 import com.darealreally.balloony.data.Feature
-import com.darealreally.balloony.data.Size as Sizes
 import com.darealreally.balloony.data.features
-import com.darealreally.balloony.ui.theme.*
+import com.darealreally.balloony.ui.theme.BalloonyTheme
+import com.darealreally.balloony.ui.theme.Quicksand
+import com.darealreally.balloony.ui.theme.Red
 import kotlinx.coroutines.launch
+import com.darealreally.balloony.data.Size as Sizes
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ItemCard(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    balloon: Balloon = MockGraph.balloons[0]
 ) {
+    // States
+    val scrollState = rememberScrollState()
+    var quantity by remember { mutableStateOf(1) }
+
+    // Side Effect
+    LaunchedEffect(balloon) {
+        Log.d("Item Card", "balloon changed")
+        // reset all preferences
+        scrollState.animateScrollTo(0)
+        quantity = 1
+    }
+
     // UI
     Card(
         modifier = modifier
@@ -50,14 +74,18 @@ fun ItemCard(
             ) {
 
                 // Col 1: NAME
-                Text(
-                    text = "Aqua",
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = Quicksand,
-                    fontSize = 30.sp,
-                    color = MaterialTheme.colors.primary,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
+                AnimatedContent(
+                    targetState = balloon.name
+                ) { name ->
+                    Text(
+                        text = name,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = Quicksand,
+                        fontSize = 30.sp,
+                        color = MaterialTheme.colors.primary,
+                        modifier = Modifier.padding(top = 10.dp)
+                    )
+                }
 
                 // Col 2: SALES BANNER
                 SalesBanner()
@@ -73,7 +101,8 @@ fun ItemCard(
 
                 // Col 1: SIZE SELECTOR
                 SizeSpinner(
-                    modifier = Modifier.weight(1F)
+                    modifier = Modifier.weight(1F),
+                    scrollState = scrollState
                 )
 
                 // Col 2: FEATURES
@@ -96,7 +125,9 @@ fun ItemCard(
                 // Col 1: QUANTITY STEPPER
                 StepperQuantity(
                     modifier = Modifier
-                        .align(Alignment.CenterVertically)
+                        .align(Alignment.CenterVertically),
+                    quantity = quantity,
+                    setQuantity = { quantity = it }
                 )
 
                 // Col 2: BUY BUTTON
@@ -213,11 +244,10 @@ fun FeatureRow(
 
 @Composable
 fun StepperQuantity(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    quantity: Int,
+    setQuantity: (Int) -> Unit
 ) {
-    // State
-    var quantity by remember { mutableStateOf(1) }
-
     // UI
     Row(
         modifier = modifier.height(IntrinsicSize.Min),
@@ -229,7 +259,7 @@ fun StepperQuantity(
         IconButton(
             onClick = {
                 if (quantity > 0) {
-                    quantity -= 1
+                    setQuantity(quantity - 1)
                 }
             },
             modifier = Modifier
@@ -265,7 +295,7 @@ fun StepperQuantity(
         // Col 3: ADD
         IconButton(
             onClick = {
-                quantity += 1
+                setQuantity(quantity + 1)
             },
             modifier = Modifier
                 .size(30.dp)
@@ -288,7 +318,8 @@ fun StepperQuantity(
 
 @Composable
 fun SizeSpinner(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    scrollState: ScrollState = rememberScrollState()
 ) {
     // Props
     val scope = rememberCoroutineScope()
@@ -299,7 +330,6 @@ fun SizeSpinner(
     val primaryColor = MaterialTheme.colors.primary
 
     // State
-    val scrollState = rememberScrollState()
     val dragState = scrollState.interactionSource.collectIsDraggedAsState()
 
     // Side Effect

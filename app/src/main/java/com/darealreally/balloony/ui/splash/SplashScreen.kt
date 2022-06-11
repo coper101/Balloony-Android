@@ -2,16 +2,13 @@ package com.darealreally.balloony.ui.splash
 
 import android.graphics.Paint
 import android.graphics.Typeface
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.repeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -33,16 +30,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.darealreally.balloony.MockGraph
 import com.darealreally.balloony.R
 import com.darealreally.balloony.data.Balloon
 import com.darealreally.balloony.ui.ScreenContent
-import com.darealreally.balloony.ui.StatelessApp
 import com.darealreally.balloony.ui.balloon.BalloonTop
 import com.darealreally.balloony.ui.theme.*
 
 @Composable
 fun SplashScreen(
-    setContent: (ScreenContent) -> Unit
+    setContent: (ScreenContent) -> Unit,
+    splashUiState: SplashUiState = SplashUiState(MockGraph.balloons)
 ) {
     // Props
     val screenHeightDp = LocalConfiguration.current.screenHeightDp
@@ -75,7 +73,7 @@ fun SplashScreen(
 
             // Row 2:
             Text(
-                text = "Gradient Colored Balloons",
+                text = stringResource(id = R.string.app_description),
                 color = MaterialTheme.colors.primary,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Start,
@@ -88,7 +86,8 @@ fun SplashScreen(
 
         // Layer 2: Balloon Circling
         BalloonCircling(
-            modifier = Modifier.offset(x = 50.dp, y = 180.dp)
+            modifier = Modifier.offset(x = 50.dp, y = 180.dp),
+            balloons = splashUiState.balloons
         )
     }
 
@@ -103,6 +102,7 @@ fun GradientTitle(
     val appName = stringResource(id = R.string.app_name)
     val screenWidthDp = LocalConfiguration.current.screenWidthDp
     val screenWidthPx = with(LocalDensity.current) { screenWidthDp.dp.toPx() }
+
     val textBgWidthDp = 1771 * 2
     val textBgHeightDp = 90
     val textBgWidthPx = with(LocalDensity.current) { textBgWidthDp.dp.toPx() }
@@ -139,6 +139,7 @@ fun GradientTitle(
         }
     }
 
+    // UI
     Canvas(
         modifier = modifier
             .requiredSize(textBgWidthDp.dp, textBgHeightDp.dp)
@@ -154,7 +155,7 @@ fun GradientTitle(
         )
 
         // GRADIENT BACKGROUND
-        val startX = textBgXOffset.value // start left edge of screen
+        val startX = textBgXOffset.value // start from left edge of screen
         drawRect(
             topLeft = Offset(startX, 0F),
             size = Size(size.width, size.height),
@@ -173,14 +174,13 @@ fun GradientTitle(
             ),
             blendMode = BlendMode.SrcAtop // this will mask the text
         )
-
-    }
+    } //: Canvas
 }
 
 @Composable
 fun BalloonCircling(
     modifier: Modifier = Modifier,
-    balloons: List<Balloon> = StatelessApp().balloons
+    balloons: List<Balloon> = MockGraph.balloons
 ) {
     // Props
     val primaryColor = MaterialTheme.colors.primary

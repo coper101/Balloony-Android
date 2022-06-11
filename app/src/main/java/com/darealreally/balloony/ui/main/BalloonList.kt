@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.Interaction
@@ -21,12 +20,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.darealreally.balloony.MockGraph
 import com.darealreally.balloony.R
 import com.darealreally.balloony.data.Balloon
-import com.darealreally.balloony.ui.AppState
-import com.darealreally.balloony.ui.StatelessApp
 import com.darealreally.balloony.ui.balloon.BalloonFront
 import com.darealreally.balloony.ui.theme.BalloonyTheme
 import kotlin.math.roundToInt
@@ -34,7 +31,8 @@ import kotlin.math.roundToInt
 @Composable
 fun BalloonList(
     modifier: Modifier = Modifier,
-    balloons: List<Balloon> = StatelessApp().balloons
+    balloons: List<Balloon> = MockGraph.balloons,
+    setSelectedBalloonIdx: (Int) -> Unit = {}
 ) {
     // Props
     val blockWidth =
@@ -69,19 +67,19 @@ fun BalloonList(
         val to = toFra * maxX
         val range = from.toInt()..to.toInt()
 
-        Log.d("Balloon List",
-            """
-                > Info 
-                max X Offset: $maxX
-                mid: $mid
-                fromFra: $fromFra
-                toFra: $toFra
-                from: $from
-                to: $to
-                range: $range
-                
-                """.trimIndent()
-        )
+//        Log.d("Balloon List",
+//            """
+//                > Info
+//                max X Offset: $maxX
+//                mid: $mid
+//                fromFra: $fromFra
+//                toFra: $toFra
+//                from: $from
+//                to: $to
+//                range: $range
+//
+//                """.trimIndent()
+//        )
 
         range
     }
@@ -90,6 +88,7 @@ fun BalloonList(
     LaunchedEffect(Unit) {
         // focus to center balloon
         scrollState.animateScrollTo((scrollState.maxValue * 0.5).roundToInt())
+        setSelectedBalloonIdx(2)
     }
 
     LaunchedEffect(interactionSource) {
@@ -119,6 +118,7 @@ fun BalloonList(
                             value = mid,
                             animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
                         )
+                        setSelectedBalloonIdx(i)
                         return@LaunchedEffect
                     }
                 }

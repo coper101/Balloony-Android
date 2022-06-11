@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.darealreally.balloony.MockGraph
 import com.darealreally.balloony.R
 import com.darealreally.balloony.ui.main.card.ItemCard
 import com.darealreally.balloony.ui.main.card.ReviewCard
@@ -39,7 +40,9 @@ import com.google.accompanist.insets.LocalWindowInsets
 import kotlin.math.roundToInt
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+   mainUiState: MainUiState = MainUiState(MockGraph.balloons)
+) {
     // Props
     val screenHeightDp = LocalConfiguration.current.screenHeightDp
     val screenHeightPx = with(LocalDensity.current) { screenHeightDp.dp.toPx() }
@@ -48,16 +51,18 @@ fun MainScreen() {
     val navBarHeightPx = with(LocalDensity.current) { navBarHeightDp.toPx() }
     val balloonListHeightPx = with(LocalDensity.current) { (177F + 17F + 52F + 80F).dp.toPx() }
 
+    val topInsetPx = LocalWindowInsets.current.systemBars.top
     val paddingTopPx = with(LocalDensity.current) { 50.dp.toPx() }
 
-    val balloonMaxYOffset = navBarHeightPx + paddingTopPx
+    val balloonMaxYOffset = navBarHeightPx + paddingTopPx + topInsetPx
     val cardMaxYOffset =  balloonMaxYOffset + balloonListHeightPx
 
     val topInsetDp = with(LocalDensity.current) {
-        LocalWindowInsets.current.systemBars.top.toDp()
+        LocalWindowInsets.current.systemBars.top.toDp() - 15.dp
     }
 
     // State
+    var selectedBalloonIdx by remember { mutableStateOf(0) }
     var startAnimating by remember { mutableStateOf(false) }
     val transition = updateTransition(targetState = startAnimating, label = "start")
     var yOffsetContent by remember { mutableStateOf(0F) }
@@ -105,6 +110,7 @@ fun MainScreen() {
             height = navBarHeightDp
         )
 
+        // Layer 2: CONTENT
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -128,7 +134,7 @@ fun MainScreen() {
                     }
                 ),
         ) {
-            // Layer 2: BALLOONS
+            // Layer 1: BALLOONS
             BalloonList(
                 modifier = Modifier
                     .offset {
@@ -136,10 +142,12 @@ fun MainScreen() {
                             x = 0,
                             y = balloonYOffset.value.roundToInt()
                         )
-                    }
+                    },
+                balloons = mainUiState.balloons,
+                setSelectedBalloonIdx = { selectedBalloonIdx = it }
             )
 
-            // Layer 3: CARDS
+            // Layer 2: CARDS
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -153,7 +161,9 @@ fun MainScreen() {
                 verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
                 // Row 1:
-                ItemCard()
+                ItemCard(
+                    balloon = mainUiState.balloons[selectedBalloonIdx]
+                )
                 // Row 2:
                 ReviewCard()
             }
@@ -175,7 +185,7 @@ fun NavigationBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        // Col 1: Menu
+        // Col 1: MENU
         Icon(
             painter = painterResource(id = R.drawable.ic_menu),
             contentDescription = "Menu",
@@ -185,7 +195,7 @@ fun NavigationBar(
             tint = MaterialTheme.colors.primary
         )
 
-        // Col 2: App Name
+        // Col 2: APP NAME
         Text(
             text = stringResource(id = R.string.app_name),
             fontWeight = FontWeight.Medium,
@@ -194,7 +204,7 @@ fun NavigationBar(
             color = MaterialTheme.colors.primary
         )
 
-        // Col 3: Search
+        // Col 3: SEARCH
         Icon(
             painter = painterResource(id = R.drawable.ic_search),
             contentDescription = "Search",
